@@ -1,4 +1,4 @@
-name: Build DeepSeek V1 DLL
+name: Auto Build DeepSeek V1 DLL
 
 on:
   push:
@@ -13,37 +13,45 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Step 1: Create minimal C++ DLL source files
+    # Step 1: Create minimal C++ DLL source files using PowerShell
     - name: Setup DLL Project
-      shell: cmd
+      shell: pwsh
       run: |
-        mkdir src
-        echo // Auto-generated DeepSeek V1 DLL > src\DeepSeekV1.cpp
-        echo #include <windows.h> >> src\DeepSeekV1.cpp
-        echo. >> src\DeepSeekV1.cpp
-        echo BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved) >> src\DeepSeekV1.cpp
-        echo { >> src\DeepSeekV1.cpp
-        echo     return TRUE; >> src\DeepSeekV1.cpp
-        echo } >> src\DeepSeekV1.cpp
-        echo. >> src\DeepSeekV1.cpp
-        echo // Export your functions here >> src\DeepSeekV1.cpp
-        echo extern "C" __declspec(dllexport) void DeepSeek_Function() {} >> src\DeepSeekV1.cpp
+        # Create source directory
+        New-Item -ItemType Directory -Path src -Force | Out-Null
+        
+        # Create main DLL source file
+        @"
+// Auto-generated DeepSeek V1 DLL
+#include <windows.h>
 
-        echo ^<?xml version="1.0" encoding="utf-8"?^> > DeepSeekV1.vcxproj
-        echo ^<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"^> >> DeepSeekV1.vcxproj
-        echo ^<ItemGroup^> >> DeepSeekV1.vcxproj
-        echo ^<ClCompile Include="src\DeepSeekV1.cpp" /^> >> DeepSeekV1.vcxproj
-        echo ^</ItemGroup^> >> DeepSeekV1.vcxproj
-        echo ^<ItemGroup^> >> DeepSeekV1.vcxproj
-        echo ^<Link Include="/DLL /OUT:DeepSeekV1.dll" /^> >> DeepSeekV1.vcxproj
-        echo ^</ItemGroup^> >> DeepSeekV1.vcxproj
-        echo ^</Project^> >> DeepSeekV1.vcxproj
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)
+{
+    return TRUE;
+}
+
+// Export your functions here
+extern "C" __declspec(dllexport) void DeepSeek_Function() {}
+"@ | Out-File -FilePath src\DeepSeekV1.cpp -Encoding ascii
+
+        # Create minimal VS project file
+        @"
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\DeepSeekV1.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Link Include="/DLL /OUT:DeepSeekV1.dll" />
+  </ItemGroup>
+</Project>
+"@ | Out-File -FilePath DeepSeekV1.vcxproj -Encoding ascii
 
     # Step 2: Set up build environment
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
 
-    # Step 3: Build the DLL
+    # Step 3: Build the DLL (using cmd for MSBuild)
     - name: Build DeepSeekV1.dll
       shell: cmd
       run: |
@@ -70,6 +78,7 @@ jobs:
 
     # Show build results
     - name: Show Build Output
-      shell: cmd
+      shell: pwsh
       run: |
-        dir /b bin\DeepSeekV1.dll
+        Get-ChildItem -Path bin\DeepSeekV1.dll
+        Write-Output "DLL built successfully!"
