@@ -9,6 +9,8 @@ List of the mods listed in the DeepSeek V1 Beta Menu.
 - Untag On Join
 - Tag Gun
 - Untag All
+- Flick Tag Gun
+- Steam Longarms
 
 # Movement
 - Super SpeedBoost
@@ -32,3 +34,5 @@ List of the mods listed in the DeepSeek V1 Beta Menu.
 - Trigger Fly
 - Noclip Fly
 - Joystck fly
+- Urine Gun
+- Water Splash Gun

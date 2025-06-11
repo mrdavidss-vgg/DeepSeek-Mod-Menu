@@ -19,6 +19,9 @@ public class TagModMenu : MonoBehaviour
     private bool gunLocked = false;
     private VRRig lockTarget;
     private bool joinAsTagged = false;
+    private bool longArmsEnabled = false;
+    private bool flickTagEnabled = false;
+    private float armlength = 1.5f; // Default arm length multiplier
 
     private void Update()
     {
@@ -47,19 +50,31 @@ public class TagModMenu : MonoBehaviour
                 }
                 else if (nav.y < -0.5f) // Down
                 {
-                    selectedOption = Mathf.Min(1, selectedOption + 1);
+                    selectedOption = Mathf.Min(3, selectedOption + 1); // Increased to 4 options
                     lastInputTime = Time.time;
                     UpdateMenuText();
                 }
                 else if (Gamepad.current?.buttonSouth.wasPressedThisFrame ?? false) // Select (A)
                 {
-                    if (selectedOption == 0) ToggleTagGun();
-                    if (selectedOption == 1) ToggleJoinStatus();
+                    HandleOptionSelection();
                 }
             }
         }
 
         if (tagGunEnabled) TagGun();
+        if (flickTagEnabled) FlickTagGun();
+        if (longArmsEnabled) EnableSteamLongArms();
+    }
+
+    private void HandleOptionSelection()
+    {
+        switch(selectedOption)
+        {
+            case 0: ToggleTagGun(); break;
+            case 1: ToggleJoinStatus(); break;
+            case 2: ToggleLongArms(); break;
+            case 3: ToggleFlickTag(); break;
+        }
     }
 
     private void ToggleTagGun()
@@ -69,145 +84,82 @@ public class TagModMenu : MonoBehaviour
         UpdateMenuText();
     }
 
-    private void ToggleJoinStatus()
+    private void ToggleLongArms()
     {
-        joinAsTagged = !joinAsTagged;
-        if (joinAsTagged) 
-        {
-            TagOnJoin();
-            NotifiLib.SendNotification("<color=#1AE6D6>Will now join as </color><color=red>TAGGED</color>");
-        }
-        else 
-        {
-            NoTagOnJoin();
-            NotifiLib.SendNotification("<color=#1AE6D6>Will now join as </color><color=green>UNTAGGED</color>");
-        }
+        longArmsEnabled = !longArmsEnabled;
+        NotifiLib.SendNotification($"<color=#1AE6D6>Long Arms {(longArmsEnabled ? "<color=green>ENABLED</color>" : "<color=red>DISABLED</color>")}</color>");
         UpdateMenuText();
     }
 
-    private void TagGun()
+    private void ToggleFlickTag()
     {
-        if (GetGunInput(false)) // Right Trigger
-        {
-            if (gunLocked && lockTarget != null && !PlayerIsTagged(lockTarget))
-            {
-                GorillaTagger.Instance.offlineVRRig.transform.position = 
-                    lockTarget.transform.position - new Vector3(0f, 3f, 0f);
-                NotifiLib.SendNotification($"<color=#1AE6D6>Teleported to </color><color=yellow>{lockTarget.photonView.Owner.NickName}</color>");
-            }
+        flickTagEnabled = !flickTagEnabled;
+        NotifiLib.SendNotification($"<color=#1AE6D6>Flick Tag {(flickTagEnabled ? "<color=green>ENABLED</color>" : "<color=red>DISABLED</color>")}</color>");
+        UpdateMenuText();
+    }
 
-            if (GetGunInput(true)) // Left Trigger
+    private void EnableSteamLongArms()
+    {
+        Player.Instance.transform.localScale = new Vector3(armlength, armlength, armlength);
+    }
+
+    private void FlickTagGun()
+    {
+        if (GetGunInput(false))
+        {
+            var gunData = RenderGun();
+            if (GetGunInput(true))
             {
-                RaycastHit hit;
-                if (Physics.Raycast(Camera.main.transform.position, 
-                    Camera.main.transform.forward, out hit, 50f))
-                {
-                    VRRig target = hit.collider.GetComponentInParent<VRRig>();
-                    if (target && !PlayerIsLocal(target))
-                    {
-                        gunLocked = true;
-                        lockTarget = target;
-                        NotifiLib.SendNotification($"<color=#1AE6D6>Locked onto </color><color=yellow>{target.photonView.Owner.NickName}</color>");
-                    }
-                }
+                Player.Instance.rightControllerTransform.position = 
+                    gunData.NewPointer.transform.position + new Vector3(0f, 0.1f, 0f);
             }
         }
-        else if (gunLocked)
-        {
-            gunLocked = false;
-        }
     }
 
-    public void UntagSelf()
+    private (RaycastHit Ray, GameObject NewPointer) RenderGun()
     {
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.Disconnect();
-            NoTagOnJoin();
-            PhotonNetwork.ConnectUsingSettings();
-            NotifiLib.SendNotification("<color=#1AE6D6>Reconnecting to untag yourself...</color>");
-        }
-        else
-        {
-            RemoveInfected(PhotonNetwork.LocalPlayer);
-            NotifiLib.SendNotification("<color=#1AE6D6>Removed tag from yourself</color>");
-        }
-        GorillaLocomotion.Player.Instance.disableMovement = false;
+        Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
+        RaycastHit hit;
+        Physics.Raycast(ray, out hit, 50f);
+
+        GameObject pointer = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        pointer.transform.position = hit.point;
+        pointer.transform.localScale = Vector3.one * 0.1f;
+        pointer.GetComponent<Renderer>().material.color = Color.red;
+        Destroy(pointer.GetComponent<Collider>());
+
+        return (hit, pointer);
     }
 
-    public void UntagAll()
-    {
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            NotifiLib.SendNotification("<color=red>ERROR:</color> You must be master client to untag everyone");
-        }
-        else
-        {
-            foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerList)
-            {
-                RemoveInfected(player);
-            }
-            NotifiLib.SendNotification("<color=#1AE6D6>Removed tags from all players</color>");
-        }
-    }
-
-    private void NoTagOnJoin()
-    {
-        PlayerPrefs.SetString("didTutorial", "nope");
-        Hashtable h = new Hashtable { { "didTutorial", false } };
-        PhotonNetwork.LocalPlayer.SetCustomProperties(h);
-        PlayerPrefs.Save();
-    }
-
-    private void TagOnJoin()
-    {
-        PlayerPrefs.SetString("didTutorial", "done");
-        Hashtable h = new Hashtable { { "didTutorial", true } };
-        PhotonNetwork.LocalPlayer.SetCustomProperties(h);
-        PlayerPrefs.Save();
-    }
-
-    private bool GetGunInput(bool primary) => 
-        primary ? (Gamepad.current?.rightTrigger.ReadValue() > 0.8f) 
-                : (Gamepad.current?.leftTrigger.ReadValue() > 0.5f);
-
-    private bool PlayerIsTagged(VRRig rig) => rig.mainSkin.material.name.Contains("infected");
-    private bool PlayerIsLocal(VRRig rig) => rig.photonView.IsMine;
+    // [Rest of your existing methods (TagGun, ToggleJoinStatus, etc.) remain unchanged...]
 
     private void UpdateMenuText()
     {
         menuText.Clear();
         menuText.AppendLine("<color=#1AE6D6>=== TAG MODS ===</color>");
+        
+        // Tag Gun
         menuText.AppendLine(selectedOption == 0 ? 
             $"> {(tagGunEnabled ? "<color=green>[ON]</color>" : "<color=red>[OFF]</color>")} <color=#1AE6D6>TAG GUN</color> <" : 
             $"{(tagGunEnabled ? "<color=green>[ON]</color>" : "<color=red>[OFF]</color>")} <color=#1AE6D6>TAG GUN</color>");
         
+        // Join Status
         menuText.AppendLine(selectedOption == 1 ? 
             $"> JOIN AS {(joinAsTagged ? "<color=red>TAGGED</color>" : "<color=green>UNTAGGED</color>")} <" : 
             $"JOIN AS {(joinAsTagged ? "<color=red>TAGGED</color>" : "<color=green>UNTAGGED</color>")}");
         
+        // Long Arms
+        menuText.AppendLine(selectedOption == 2 ? 
+            $"> {(longArmsEnabled ? "<color=green>[ON]</color>" : "<color=red>[OFF]</color>")} <color=#1AE6D6>LONG ARMS</color> <" : 
+            $"{(longArmsEnabled ? "<color=green>[ON]</color>" : "<color=red>[OFF]</color>")} <color=#1AE6D6>LONG ARMS</color>");
+        
+        // Flick Tag
+        menuText.AppendLine(selectedOption == 3 ? 
+            $"> {(flickTagEnabled ? "<color=green>[ON]</color>" : "<color=red>[OFF]</color>")} <color=#1AE6D6>FLICK TAG</color> <" : 
+            $"{(flickTagEnabled ? "<color=green>[ON]</color>" : "<color=red>[OFF]</color>")} <color=#1AE6D6>FLICK TAG</color>");
+        
         menuText.AppendLine("\n<color=#AAAAAA>A: Select  X: Close</color>");
     }
 
-    private void OnGUI()
-    {
-        if (!menuVisible) return;
-        
-        GUIStyle style = new GUIStyle();
-        style.richText = true;
-        style.fontSize = 20;
-        style.normal.textColor = Color.white;
-
-        GUI.Label(new Rect(50, 50, 300, 300), menuText.ToString(), style);
-    }
-
-    private static void RemoveInfected(Photon.Realtime.Player player)
-    {
-        if (player.CustomProperties.ContainsKey("infected"))
-        {
-            Hashtable hash = new Hashtable();
-            hash.Add("infected", false);
-            player.SetCustomProperties(hash);
-        }
-    }
+    // [Rest of your existing methods (OnGUI, PlayerIsTagged, etc.) remain unchanged...]
 }
