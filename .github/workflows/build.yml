@@ -13,14 +13,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Step 1: Create minimal C++ DLL source files and MSBuild project
-    - name: Setup DLL Project
+    # Step 1: Create source code
+    - name: Create DLL Source Code
       shell: pwsh
       run: |
-        # Create source directory
         New-Item -ItemType Directory -Path src -Force | Out-Null
-
-        # Create main DLL source file
         @'
 // Auto-generated DeepSeek V1 DLL
 #include <windows.h>
@@ -34,54 +31,33 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)
 extern "C" __declspec(dllexport) void DeepSeek_Function() {}
 '@ | Out-File -FilePath src/DeepSeekV1.cpp -Encoding ascii
 
-        # Create minimal VS project file
-        @'
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup>
-    <ClCompile Include="src\DeepSeekV1.cpp" />
-  </ItemGroup>
-  <PropertyGroup>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
-    <OutDir>bin\</OutDir>
-    <TargetName>DeepSeekV1</TargetName>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-</Project>
-'@ | Out-File -FilePath DeepSeekV1.vcxproj -Encoding ascii
+    # Step 2: Set up Developer Command Prompt environment
+    - name: Setup Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
 
-    # Step 2: Set up build environment
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1
-
-    # Step 3: Build the DLL
-    - name: Build DeepSeekV1.dll
+    # Step 3: Compile the DLL using cl.exe
+    - name: Build DLL with cl.exe
       shell: cmd
       run: |
-        msbuild DeepSeekV1.vcxproj ^
-          /p:Configuration=Release ^
-          /p:Platform=x64
+        cl /LD src\DeepSeekV1.cpp /Fe:DeepSeekV1.dll
 
-        if not exist "bin\DeepSeekV1.dll" (
-          echo ::error::Failed to build DeepSeekV1.dll
+        if not exist DeepSeekV1.dll (
+          echo ::error::DLL build failed
           exit 1
         )
 
-    # Step 4: Package the results
+    # Step 4: Upload DLL Artifact
     - name: Upload DLL Artifact
       uses: actions/upload-artifact@v4
       with:
         name: DeepSeekV1-Menu-DLL
-        path: bin/DeepSeekV1.dll
+        path: DeepSeekV1.dll
         if-no-files-found: error
         retention-days: 7
 
-    # Step 5: Show build output
+    # Step 5: Show Build Output
     - name: Show Build Output
       shell: pwsh
       run: |
-        Get-ChildItem -Path bin/DeepSeekV1.dll
+        Get-ChildItem -Path .\DeepSeekV1.dll
         Write-Output "DLL built successfully!"
