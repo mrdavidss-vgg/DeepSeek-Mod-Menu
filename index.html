@@ -4,201 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeepSeek GTAG Mod Menu</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap');
-        
-        :root {
-            --deepseek-blue: #0066ff;
-            --glow-blue: #00a2ff;
-            --dark-bg: #0a0a1a;
-        }
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--dark-bg);
-            color: white;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            text-align: center;
-            padding: 50px 0;
-            position: relative;
-        }
-        
-        h1 {
-            color: white;
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 15px var(--glow-blue);
-            font-weight: 900;
-            letter-spacing: -1px;
-            position: relative;
-            display: inline-block;
-        }
-        
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--deepseek-blue), transparent);
-            box-shadow: 0 0 10px var(--glow-blue);
-        }
-        
-        .subtitle {
-            color: #aaa;
-            font-size: 1.2rem;
-            margin-top: 10px;
-        }
-        
-        .section {
-            margin: 40px 0;
-            padding: 25px;
-            background-color: rgba(0, 20, 40, 0.3);
-            border-radius: 10px;
-            border: 1px solid rgba(0, 102, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(0, 102, 255, 0.05), transparent);
-            pointer-events: none;
-        }
-        
-        h2 {
-            color: var(--glow-blue);
-            margin-top: 0;
-            font-size: 1.8rem;
-            text-shadow: 0 0 8px rgba(0, 162, 255, 0.5);
-        }
-        
-        .btn {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--deepseek-blue), var(--glow-blue));
-            color: white;
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: bold;
-            margin-top: 15px;
-            transition: all 0.3s;
-            border: none;
-            font-size: 1rem;
-            box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 25px rgba(0, 102, 255, 0.8);
-        }
-        
-        .btn:active {
-            transform: translateY(1px);
-        }
-        
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                transparent,
-                rgba(255, 255, 255, 0.1),
-                transparent
-            );
-            transform: rotate(30deg);
-            transition: all 0.5s;
-        }
-        
-        .btn:hover::after {
-            left: 100%;
-        }
-        
-        footer {
-            text-align: center;
-            padding: 30px;
-            margin-top: 50px;
-            color: #777;
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(0, 102, 255, 0.2);
-        }
-        
-        ul {
-            padding-left: 20px;
-        }
-        
-        li {
-            margin-bottom: 8px;
-            position: relative;
-        }
-        
-        li::before {
-            content: '•';
-            color: var(--glow-blue);
-            font-weight: bold;
-            display: inline-block;
-            width: 1em;
-            margin-left: -1em;
-            text-shadow: 0 0 5px var(--glow-blue);
-        }
-        
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2.2rem;
-            }
-            .container {
-                padding: 15px;
-            }
-        }
-        
-        @keyframes glow-pulse {
-            0% { text-shadow: 0 0 10px var(--glow-blue); }
-            50% { text-shadow: 0 0 20px var(--glow-blue); }
-            100% { text-shadow: 0 0 10px var(--glow-blue); }
-        }
-        
-        .glow {
-            animation: glow-pulse 2s infinite;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <div class="warning-banner" id="warningBanner">
+        <span class="warning-text">⚠️ This DLL Might not work. Please wait after verification by me.</span>
+        <button class="close-btn" id="closeBannerBtn">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="container" id="mainContainer">
         <header>
-            <h1 class="glow">DEEPSEEK MOD MENU</h1>
+            <h1 class="glow">DeepSeek Menu</h1>
             <div class="subtitle">For Gorilla Tag Copies or Real GTAG!</div>
         </header>
         
         <div class="section">
             <h2>About</h2>
-            <p>The official DeepSeek-made mod menu for Gorilla Tag.</p>
+            <p>The DeepSeek-made mod menu for GTAG!!1!!1!1</p>
             <ul>
-                <li>Clean blue interface matching DeepSeek AI</li>
+                <li>Clean blue interface matching DeepSeek AI colors</li>
                 <li>Glowing visual effects</li>
-                <li>Optimized for Quest performance</li>
                 <li>Simple X-button activation</li>
             </ul>
         </div>
@@ -206,11 +33,11 @@
         <div class="section">
             <h2>Nice Features</h2>
             <ul>
-                <li><strong>NoClip</strong> Phase through walls</li>
-                <li><strong>Fly</strong> Free fly</li>
-                <li><strong>Tag Utilities</strong> Enhanced tagging system</li>
+                <li><strong>NoClip</strong> go through walls</li>
+                <li><strong>Fly</strong> fly</li>
+                <li><strong>Tag Utilities</strong>Tag n Shit 🔥</li>
                 <li><strong>Visual</strong> ESP</li>
-                <li><strong>Performance</strong> Less lag implementation</li>
+                <li><strong>SpeedBoost</strong>Makes you go zoom fr</li>
             </ul>
         </div>
         
@@ -218,6 +45,7 @@
             <h2>Download</h2>
             <p>Current version: <strong>V0.1 Alpha</strong></p>
             <p>Compatible with Gorilla Tag, Fan Games + Copies!!</p>
+            <p>Not sure if this shit even works 😭</p>
             <a href="#" class="btn">Coming Soon!</a>
         </div>
         
@@ -225,6 +53,7 @@
             <h2>Installation</h2>
               <p>1. Watch this tut because i dont wanna type alla that.</p>
             <a href="https://youtu.be/KhzMO3bfSJg?si=RkoePsDh0fc7SO9ehttps://youtu.be/KhzMO3bfSJg?si=RkoePsDh0fc7SO9e" class="btn">Youtube Tut</a>
+                <p>Use our dll.</p>
         </div>
         
         <footer>
@@ -232,5 +61,21 @@
             <p>Moddified a little bit and took the tag all src from iis stupid menu :></p>
         </footer>
     </div>
+
+    <script>
+        document.getElementById('closeBannerBtn').addEventListener('click', function() {
+            const banner = document.getElementById('warningBanner');
+            const container = document.getElementById('mainContainer');
+            
+            // Add closing class to trigger CSS animation
+            banner.classList.add('closing');
+            container.classList.add('banner-closed');
+            
+            // Remove the banner from DOM after animation completes
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 500); // Match this duration with the CSS transition time
+        });
+    </script>
 </body>
 </html>
