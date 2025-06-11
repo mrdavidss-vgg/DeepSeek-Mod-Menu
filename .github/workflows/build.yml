@@ -21,8 +21,7 @@ jobs:
       shell: pwsh
       run: |
         New-Item -ItemType Directory -Path src -Force | Out-Null
-        @'
-// Auto-generated DeepSeek V1 DLL
+        Set-Content -Path src/DeepSeekV1.cpp -Value @"
 #include <windows.h>
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)
@@ -31,7 +30,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)
 }
 
 extern "C" __declspec(dllexport) void DeepSeek_Function() {}
-'@ | Out-File -FilePath src/DeepSeekV1.cpp -Encoding ascii
+"@
 
     - name: Compile DLL
       shell: cmd
