@@ -11,9 +11,12 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    # Step 1: Create source code
+    - name: Set up Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+
     - name: Create DLL Source Code
       shell: pwsh
       run: |
@@ -27,16 +30,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)
     return TRUE;
 }
 
-// Export your functions here
 extern "C" __declspec(dllexport) void DeepSeek_Function() {}
 '@ | Out-File -FilePath src/DeepSeekV1.cpp -Encoding ascii
 
-    # Step 2: Set up Developer Command Prompt environment
-    - name: Setup Developer Command Prompt
-      uses: ilammy/msvc-dev-cmd@v1
-
-    # Step 3: Compile the DLL using cl.exe
-    - name: Build DLL with cl.exe
+    - name: Compile DLL
       shell: cmd
       run: |
         cl /LD src\DeepSeekV1.cpp /Fe:DeepSeekV1.dll
@@ -46,7 +43,6 @@ extern "C" __declspec(dllexport) void DeepSeek_Function() {}
           exit 1
         )
 
-    # Step 4: Upload DLL Artifact
     - name: Upload DLL Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -54,10 +50,3 @@ extern "C" __declspec(dllexport) void DeepSeek_Function() {}
         path: DeepSeekV1.dll
         if-no-files-found: error
         retention-days: 7
-
-    # Step 5: Show Build Output
-    - name: Show Build Output
-      shell: pwsh
-      run: |
-        Get-ChildItem -Path .\DeepSeekV1.dll
-        Write-Output "DLL built successfully!"
