@@ -1,4 +1,4 @@
-name: Build DeepSeek V1 Gorilla Tag Menu
+name: Build DeepSeek V1 GT Menu
 
 on:
   push:
@@ -17,12 +17,12 @@ jobs:
       uses: microsoft/setup-msbuild@v1
       
     - name: Build Solution
+      shell: cmd  # Force using CMD instead of PowerShell
       run: |
-        # Create artifacts directory if it doesn't exist
         if not exist artifacts mkdir artifacts
-        msbuild YourSolution.sln `
-          /p:Configuration=Release `
-          /p:Platform=x64 `
+        msbuild YourSolution.sln ^
+          /p:Configuration=Release ^
+          /p:Platform=x64 ^
           /p:OutDir=artifacts\
       
     - name: Upload DLL Artifact
@@ -30,4 +30,4 @@ jobs:
       with:
         name: DeepSeek-V1
         path: artifacts\*.dll
-        if-no-files-found: error
+        if-no-files-found: erroro
