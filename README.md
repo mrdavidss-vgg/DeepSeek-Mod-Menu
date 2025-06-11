@@ -1,7 +1,7 @@
 
 
 <p align="center">
-  <a href="#"><img src="https://cdn.deepseek.com/chat/icon.png](https://github.com/deepseek-ai/DeepSeek-V2/blob/main/figures/logo.svg?raw=true"></a><p>menu lol</p>
+  <a href="#"><img src="https://github.com/deepseek-ai/DeepSeek-V2/blob/main/figures/logo.svg?raw=true"></a><p>menu lol</p>
 </p>
 
 # <img src="https://cdn.deepseek.com/chat/icon.png" width="24" height="24" alt="Deepseek" /> The DeepSeek Mod Menu
