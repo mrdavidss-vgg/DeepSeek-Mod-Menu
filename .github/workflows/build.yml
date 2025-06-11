@@ -1,4 +1,4 @@
-name: Auto Build DeepSeek V1 DLL
+name: Build DeepSeek V1 DLL
 
 on:
   push:
@@ -13,16 +13,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Step 1: Create minimal C++ DLL source files automatically
+    # Step 1: Create minimal C++ DLL source files
     - name: Setup DLL Project
       shell: cmd
       run: |
-        @echo off
-        
-        :: Create source directory
-        if not exist src mkdir src
-
-        :: Create main DLL source file
+        mkdir src
         echo // Auto-generated DeepSeek V1 DLL > src\DeepSeekV1.cpp
         echo #include <windows.h> >> src\DeepSeekV1.cpp
         echo. >> src\DeepSeekV1.cpp
@@ -34,7 +29,6 @@ jobs:
         echo // Export your functions here >> src\DeepSeekV1.cpp
         echo extern "C" __declspec(dllexport) void DeepSeek_Function() {} >> src\DeepSeekV1.cpp
 
-        :: Create minimal VS project file
         echo ^<?xml version="1.0" encoding="utf-8"?^> > DeepSeekV1.vcxproj
         echo ^<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"^> >> DeepSeekV1.vcxproj
         echo ^<ItemGroup^> >> DeepSeekV1.vcxproj
@@ -53,7 +47,6 @@ jobs:
     - name: Build DeepSeekV1.dll
       shell: cmd
       run: |
-        @echo off
         msbuild DeepSeekV1.vcxproj ^
           /p:Configuration=Release ^
           /p:Platform=x64 ^
@@ -75,10 +68,8 @@ jobs:
         if-no-files-found: error
         retention-days: 7
 
-    # Optional: Show build results
+    # Show build results
     - name: Show Build Output
       shell: cmd
       run: |
-        @echo off
-        echo DLL successfully built:
         dir /b bin\DeepSeekV1.dll
