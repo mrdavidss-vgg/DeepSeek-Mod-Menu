@@ -13,6 +13,9 @@ List of the mods listed in the DeepSeek V1 Beta Menu.
 # Movement
 - Super SpeedBoost
 - Low SpeedBoost
+- Auto Branch
+- Dash
+- Platforms
 
 # Visual
 - ESP
