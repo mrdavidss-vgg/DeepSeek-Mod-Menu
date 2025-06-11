@@ -2,9 +2,9 @@ name: Auto Build DeepSeek V1 DLL
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-dll:
@@ -19,7 +19,7 @@ jobs:
       run: |
         # Create source directory
         New-Item -ItemType Directory -Path src -Force | Out-Null
-        
+
         # Create main DLL source file
         @'
 // Auto-generated DeepSeek V1 DLL
@@ -61,7 +61,7 @@ extern "C" __declspec(dllexport) void DeepSeek_Function() {}
           /p:OutDir=.\bin\ ^
           /p:TargetName=DeepSeekV1 ^
           /p:WindowsTargetPlatformVersion=10.0
-        
+
         if not exist "bin\DeepSeekV1.dll" (
           echo ::error::Failed to build DeepSeekV1.dll
           exit 1
