@@ -1,4 +1,4 @@
-name: Build DeepSeek-V1 GT Menu
+name: Build DeepSeek V1 Menu
 
 on:
   push:
@@ -13,25 +13,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: List files (debug)
-      shell: cmd
-      run: dir /s /b *.sln || echo "No solution files found"
-    
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
       
-    - name: Build Solution
+    - name: Build DLL
       shell: cmd
       run: |
-        if not exist artifacts mkdir artifacts
-        msbuild "MyActualSolution.sln" ^
+        msbuild "DeepSeekV1.vcxproj" ^
           /p:Configuration=Release ^
           /p:Platform=x64 ^
-          /p:OutDir=artifacts\
-      
-    - name: Upload DLL Artifact
+          /p:OutDir=.\artifacts\ ^
+          /p:TargetName=DeepSeekV1
+        
+        dir /b artifacts\DeepSeekV1.dll || exit 1
+        
+    - name: Upload DLL
       uses: actions/upload-artifact@v4
       with:
-        name: DeepSeek-V1
-        path: artifacts\*.dll
+        name: DeepSeekV1-Menu
+        path: artifacts\DeepSeekV1.dll
         if-no-files-found: error
