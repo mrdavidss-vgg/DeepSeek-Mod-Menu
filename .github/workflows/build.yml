@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Step 1: Create minimal C++ DLL source files using PowerShell
+    # Step 1: Create minimal C++ DLL source files
     - name: Setup DLL Project
       shell: pwsh
       run: |
@@ -21,7 +21,7 @@ jobs:
         New-Item -ItemType Directory -Path src -Force | Out-Null
         
         # Create main DLL source file
-        @"
+        @'
 // Auto-generated DeepSeek V1 DLL
 #include <windows.h>
 
@@ -32,10 +32,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)
 
 // Export your functions here
 extern "C" __declspec(dllexport) void DeepSeek_Function() {}
-"@ | Out-File -FilePath src\DeepSeekV1.cpp -Encoding ascii
+'@ | Out-File -FilePath src/DeepSeekV1.cpp -Encoding ascii
 
         # Create minimal VS project file
-        @"
+        @'
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
@@ -45,13 +45,13 @@ extern "C" __declspec(dllexport) void DeepSeek_Function() {}
     <Link Include="/DLL /OUT:DeepSeekV1.dll" />
   </ItemGroup>
 </Project>
-"@ | Out-File -FilePath DeepSeekV1.vcxproj -Encoding ascii
+'@ | Out-File -FilePath DeepSeekV1.vcxproj -Encoding ascii
 
     # Step 2: Set up build environment
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
 
-    # Step 3: Build the DLL (using cmd for MSBuild)
+    # Step 3: Build the DLL
     - name: Build DeepSeekV1.dll
       shell: cmd
       run: |
@@ -72,7 +72,7 @@ extern "C" __declspec(dllexport) void DeepSeek_Function() {}
       uses: actions/upload-artifact@v4
       with:
         name: DeepSeekV1-Menu-DLL
-        path: bin\DeepSeekV1.dll
+        path: bin/DeepSeekV1.dll
         if-no-files-found: error
         retention-days: 7
 
@@ -80,5 +80,5 @@ extern "C" __declspec(dllexport) void DeepSeek_Function() {}
     - name: Show Build Output
       shell: pwsh
       run: |
-        Get-ChildItem -Path bin\DeepSeekV1.dll
+        Get-ChildItem -Path bin/DeepSeekV1.dll
         Write-Output "DLL built successfully!"
