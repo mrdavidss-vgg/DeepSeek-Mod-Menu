@@ -1,6 +1,10 @@
-name: Build DeepSeek Menu V1 Alpha
+name: Build DeepSeek V1 Gorilla Tag Menu
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -13,10 +17,17 @@ jobs:
       uses: microsoft/setup-msbuild@v1
       
     - name: Build Solution
-      run: msbuild YourSolution.sln /p:Configuration=Release /p:Platform=x64 /p:OutDir=artifacts\
+      run: |
+        # Create artifacts directory if it doesn't exist
+        if not exist artifacts mkdir artifacts
+        msbuild YourSolution.sln `
+          /p:Configuration=Release `
+          /p:Platform=x64 `
+          /p:OutDir=artifacts\
       
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload DLL Artifact
+      uses: actions/upload-artifact@v4
       with:
         name: DeepSeek-V1
         path: artifacts\*.dll
+        if-no-files-found: error
