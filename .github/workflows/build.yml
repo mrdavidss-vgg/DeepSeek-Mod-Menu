@@ -21,16 +21,17 @@ jobs:
       shell: pwsh
       run: |
         New-Item -ItemType Directory -Path src -Force | Out-Null
-        Set-Content -Path src/DeepSeekV1.cpp -Value @"
-#include <windows.h>
-
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)
-{
-    return TRUE;
-}
-
-extern "C" __declspec(dllexport) void DeepSeek_Function() {}
-"@
+        $code = @(
+          '#include <windows.h>',
+          '',
+          'BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved)',
+          '{',
+          '    return TRUE;',
+          '}',
+          '',
+          'extern "C" __declspec(dllexport) void DeepSeek_Function() {}'
+        )
+        $code | Set-Content -Path src/DeepSeekV1.cpp -Encoding ascii
 
     - name: Compile DLL
       shell: cmd
