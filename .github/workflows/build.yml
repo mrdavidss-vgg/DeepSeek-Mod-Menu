@@ -43,10 +43,10 @@ jobs:
           exit 1
         )
 
-    - name: Upload DLL Artifact
+    - name: Upload DLL Artifact (im gay joke)
       uses: actions/upload-artifact@v4
       with:
-        name: DeepSeekV1-Menu-DLL
+        name: DeepSeekV1
         path: DeepSeekV1.dll
         if-no-files-found: error
         retention-days: 7
