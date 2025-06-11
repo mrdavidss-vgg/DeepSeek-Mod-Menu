@@ -13,21 +13,51 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    # Debug: Show repository structure
+    - name: List files
+      shell: cmd
+      run: dir /s /b
+    
+    # Auto-find project file (prioritizes .vcxproj, falls back to .sln)
+    - name: Find project file
+      id: find_project
+      shell: bash
+      run: |
+        vcxproj=$(find . -name "*.vcxproj" | head -1)
+        sln=$(find . -name "*.sln" | head -1)
+        
+        if [ -n "$vcxproj" ]; then
+          echo "project_file=$vcxproj" >> $GITHUB_OUTPUT
+          echo "::notice::Using project file: $vcxproj"
+        elif [ -n "$sln" ]; then
+          echo "project_file=$sln" >> $GITHUB_OUTPUT
+          echo "::notice::Using solution file: $sln"
+        else
+          echo "::error::No .vcxproj or .sln files found"
+          exit 1
+        fi
+
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
       
-    - name: Build DLL
+    - name: Build DeepSeekV1.dll
       shell: cmd
       run: |
-        msbuild "DeepSeekV1.vcxproj" ^
+        msbuild "%{{ steps.find_project.outputs.project_file }}%" ^
           /p:Configuration=Release ^
           /p:Platform=x64 ^
           /p:OutDir=.\artifacts\ ^
-          /p:TargetName=DeepSeekV1
+          /p:TargetName=DeepSeekV1 ^
+          /p:WindowsTargetPlatformVersion=10.0
         
-        dir /b artifacts\DeepSeekV1.dll || exit 1
-        
-    - name: Upload DLL
+        # Verify DLL exists
+        if not exist "artifacts\DeepSeekV1.dll" (
+          echo "::error::DeepSeekV1.dll was not created!"
+          dir /s /b *.dll || echo "No DLL files found"
+          exit 1
+        )
+
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: DeepSeekV1-Menu
